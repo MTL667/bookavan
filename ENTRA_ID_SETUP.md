@@ -110,6 +110,60 @@ https://bookavan.jouwbedrijf.nl/logout
 
 ### 3.5 Klik op "Save"
 
+## ❓ Heb je een Client Secret nodig?
+
+### Kort Antwoord: NEE! ❌
+
+Voor BookAVan heb je **GEEN client secret** nodig omdat we een **public client application** gebruiken met MSAL.js in de browser.
+
+### Waarom Niet?
+
+**Onze setup (Public Client):**
+```javascript
+✅ MSAL.js draait in browser (client-side)
+✅ Gebruikt PKCE voor beveiliging
+✅ Geen secret nodig (zou onveilig zijn in browser code)
+```
+
+**Client secrets zijn alleen nodig voor:**
+```
+❌ Server-side OAuth flows (backend-only)
+❌ Daemon/service apps (geen gebruikersinterface)
+❌ API-to-API communicatie
+```
+
+### In Azure Portal
+
+Bij **"Certificates & secrets"** hoef je **NIETS** te doen:
+- ❌ Geen client secret aanmaken
+- ❌ Geen certificaat uploaden
+- ✅ Laat deze sectie gewoon leeg!
+
+### Platform Type
+
+Zorg ervoor dat je het juiste platform type hebt:
+
+**✅ Correct voor onze setup:**
+```
+Authentication → Platform configurations → Single-page application
+```
+
+**❌ NIET gebruiken (vereist secret):**
+```
+Authentication → Platform configurations → Web
+```
+
+Als je per ongeluk "Web" hebt gekozen, geen probleem - het werkt ook, je hoeft alleen geen secret in te vullen.
+
+### Beveiliging
+
+Onze setup is veilig door:
+- ✅ **PKCE** (Proof Key for Code Exchange) - automatisch door MSAL.js
+- ✅ **Token validatie** op de backend
+- ✅ **Tenant whitelist** controle
+- ✅ **Short-lived tokens** (vervallen na 1 uur)
+- ✅ **HTTPS** voor alle communicatie
+
 ## 🔓 Stap 4: API Permissions Controleren
 
 ### 4.1 Ga naar API Permissions
