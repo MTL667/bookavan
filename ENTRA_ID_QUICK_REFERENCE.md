@@ -2,6 +2,20 @@
 
 Snelle referentie voor wat je wel en niet nodig hebt.
 
+## 🏢 Multitenant Setup (BookAVan)
+
+BookAVan is geconfigureerd als **multitenant application**. Dit betekent:
+
+✅ Meerdere organisaties kunnen inloggen met hun eigen Azure AD  
+✅ Elke organisatie behoudt hun eigen gebruikers en data  
+✅ Optionele whitelist voor extra beveiliging  
+
+**Authority URL in code:**
+```
+https://login.microsoftonline.com/organizations
+```
+Dit accepteert **alle** Azure AD werk/school accounts.
+
 ## ✅ Wat je WEL nodig hebt
 
 | Item | Waar te vinden | Voorbeeld | Verplicht |
@@ -9,6 +23,7 @@ Snelle referentie voor wat je wel en niet nodig hebt.
 | **Client ID** | Azure Portal → App registration → Overview | `12345678-abcd-1234-efgh-123456789012` | ✅ Ja |
 | **Redirect URI** | Configureren in Azure Portal → Authentication | `https://bookavan.jouwbedrijf.nl` | ✅ Ja |
 | **ID tokens enabled** | Azure Portal → Authentication → Implicit grant | Checkbox aanvinken | ✅ Ja |
+| **Account type** | Azure Portal → App registration | "Any organizational directory (Multitenant)" | ✅ Ja |
 
 ## ❌ Wat je NIET nodig hebt
 
@@ -148,6 +163,77 @@ Draait je auth code in de browser?
          ✅ Secret blijft op server
          📄 NIET voor BookAVan
 ```
+
+## 🏢 Multitenant Scenarios
+
+### Scenario 1: Open voor Alle Organisaties
+
+```env
+ENTRA_CLIENT_ID=abc-123
+ENTRA_ALLOWED_TENANTS=
+```
+
+**Gedrag:**
+- ✅ Bedrijf A medewerkers kunnen inloggen
+- ✅ Bedrijf B medewerkers kunnen inloggen  
+- ✅ Bedrijf C medewerkers kunnen inloggen
+- ✅ Elke Azure AD organisatie
+
+**Wanneer gebruiken:** Als je een publieke service aanbiedt
+
+### Scenario 2: Whitelist van Specifieke Klanten
+
+```env
+ENTRA_CLIENT_ID=abc-123
+ENTRA_ALLOWED_TENANTS=tenant-A,tenant-B
+```
+
+**Gedrag:**
+- ✅ Bedrijf A medewerkers kunnen inloggen
+- ✅ Bedrijf B medewerkers kunnen inloggen
+- ❌ Bedrijf C medewerkers KUNNEN NIET inloggen
+
+**Wanneer gebruiken:** Als je alleen specifieke klanten wilt bedienen
+
+### Scenario 3: Geleidelijke Uitrol
+
+**Fase 1 - Pilot:**
+```env
+ENTRA_ALLOWED_TENANTS=jouw-eigen-tenant-id
+```
+
+**Fase 2 - Eerste Klanten:**
+```env
+ENTRA_ALLOWED_TENANTS=jouw-tenant,klant1-tenant,klant2-tenant
+```
+
+**Fase 3 - Open voor Iedereen:**
+```env
+ENTRA_ALLOWED_TENANTS=
+```
+
+## 🔍 Tenant ID Vinden
+
+Als je een whitelist wilt maken:
+
+1. **Voor je eigen organisatie:**
+   - Azure Portal → Azure Active Directory → Overview
+   - Kopieer "Tenant ID"
+
+2. **Voor klanten:**
+   - Vraag hen hun Tenant ID te delen
+   - Of: Log in, check server logs voor `tid` in token
+   - Of: Zij vinden het op dezelfde plek in hun Azure Portal
+
+3. **Via login logs:**
+   ```bash
+   # Start app met logging
+   npm start
+   
+   # Gebruiker logt in
+   # In logs zie je:
+   Token decoded: { tid: "abc-123-def-456", ... }
+   ```
 
 ## 🎯 Checklist
 

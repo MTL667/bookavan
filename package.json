@@ -5,7 +5,9 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "verify": "node verify-multitenant.js",
+    "verify-config": "node verify-multitenant.js"
   },
   "keywords": [
     "booking",
