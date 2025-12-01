@@ -26,24 +26,8 @@
           "value": "3000"
         },
         {
-          "key": "PGHOST",
-          "value": "$(PROJECT_NAME)_postgres"
-        },
-        {
-          "key": "PGPORT",
-          "value": "5432"
-        },
-        {
-          "key": "PGUSER",
-          "value": "bookavan"
-        },
-        {
-          "key": "PGPASSWORD",
-          "value": "$$generate(password)"
-        },
-        {
-          "key": "PGDATABASE",
-          "value": "bookavan"
+          "key": "DATABASE_URL",
+          "value": "$$link(postgres)"
         },
         {
           "key": "SENDGRID_API_KEY",

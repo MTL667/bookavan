@@ -4,7 +4,9 @@ This guide covers deploying BookAVan to Easypanel and other platforms.
 
 ## 📦 Easypanel Deployment (Recommended)
 
-Easypanel provides the simplest deployment experience with automatic SSL, database management, and environment configuration.
+Easypanel provides the simplest deployment experience with automatic SSL, database management, and **internal service links** (no manual credentials needed!).
+
+> 📘 **Gedetailleerde Easypanel Gids**: Zie [`EASYPANEL_SETUP.md`](EASYPANEL_SETUP.md) voor een complete stap-voor-stap handleiding met screenshots en troubleshooting.
 
 ### Prerequisites
 
@@ -12,6 +14,19 @@ Easypanel provides the simplest deployment experience with automatic SSL, databa
 - GitHub/GitLab repository with your code
 - SendGrid account
 - Microsoft Entra ID application
+
+### Quick Start with Internal Links
+
+BookAVan is geconfigureerd om **DATABASE_URL** te gebruiken via Easypanel's interne service links:
+
+```env
+DATABASE_URL = [Link to bookavan-db]  ← Easypanel doet dit automatisch!
+```
+
+**Geen losse credentials nodig** - Easypanel genereert automatisch:
+```
+postgresql://user:password@service:5432/database
+```
 
 ### Step-by-Step Deployment
 
@@ -60,13 +75,15 @@ In the app settings, add these environment variables:
 NODE_ENV=production
 PORT=3000
 
-# PostgreSQL Connection
-# Get these from your Easypanel PostgreSQL service
-PGHOST=bookavan-db  # Internal service name
-PGPORT=5432
-PGUSER=bookavan
-PGPASSWORD=your_generated_password
-PGDATABASE=bookavan
+# PostgreSQL Connection (RECOMMENDED: Use internal link)
+DATABASE_URL=[Link to bookavan-db service]  ← Easypanel link feature
+
+# Alternative: Individual credentials (not needed if DATABASE_URL is set)
+# PGHOST=bookavan-db
+# PGPORT=5432
+# PGUSER=bookavan
+# PGPASSWORD=your_generated_password
+# PGDATABASE=bookavan
 
 # SendGrid Email
 SENDGRID_API_KEY=SG.xxxxxxxxxxxxxxxxxxxxx

@@ -95,20 +95,38 @@ if (!process.env.ADMIN_EMAILS) {
 console.log('\n📋 5. Database Configuratie');
 console.log('─'.repeat(60));
 
-const dbVars = ['PGHOST', 'PGUSER', 'PGPASSWORD', 'PGDATABASE'];
-const missingDb = dbVars.filter(v => !process.env[v]);
-
-if (missingDb.length === 0) {
-    console.log('✅ Database configuratie compleet');
-    console.log(`   Host: ${process.env.PGHOST}`);
-    console.log(`   Database: ${process.env.PGDATABASE}`);
-    console.log(`   User: ${process.env.PGUSER}`);
+if (process.env.DATABASE_URL) {
+    console.log('✅ DATABASE_URL is ingesteld (Easypanel internal link)');
+    // Don't log the full URL (contains password)
+    const urlMatch = process.env.DATABASE_URL.match(/postgresql:\/\/([^:]+):.*@([^:]+):(\d+)\/(.+)/);
+    if (urlMatch) {
+        const [, user, host, port, database] = urlMatch;
+        console.log(`   Host: ${host}`);
+        console.log(`   Port: ${port}`);
+        console.log(`   Database: ${database}`);
+        console.log(`   User: ${user}`);
+    } else {
+        console.log('   ⚠️  URL format lijkt niet correct');
+        hasWarnings = true;
+    }
 } else {
-    console.log('❌ Database configuratie incompleet:');
-    missingDb.forEach(v => {
-        console.log(`   → ${v} ontbreekt`);
-    });
-    hasErrors = true;
+    const dbVars = ['PGHOST', 'PGUSER', 'PGPASSWORD', 'PGDATABASE'];
+    const missingDb = dbVars.filter(v => !process.env[v]);
+
+    if (missingDb.length === 0) {
+        console.log('✅ Database configuratie compleet (individuele credentials)');
+        console.log(`   Host: ${process.env.PGHOST}`);
+        console.log(`   Database: ${process.env.PGDATABASE}`);
+        console.log(`   User: ${process.env.PGUSER}`);
+    } else {
+        console.log('❌ Database configuratie incompleet:');
+        console.log('   Gebruik DATABASE_URL (aanbevolen voor Easypanel)');
+        console.log('   Of configureer individuele credentials:');
+        missingDb.forEach(v => {
+            console.log(`   → ${v} ontbreekt`);
+        });
+        hasErrors = true;
+    }
 }
 
 // Check 6: SendGrid Configuration

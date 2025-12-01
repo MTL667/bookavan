@@ -18,13 +18,21 @@ app.use(express.static('public'));
 app.use('/uploads', express.static('uploads'));
 
 // PostgreSQL connection
-const pool = new Pool({
-  host: process.env.PGHOST,
-  port: process.env.PGPORT || 5432,
-  user: process.env.PGUSER,
-  password: process.env.PGPASSWORD,
-  database: process.env.PGDATABASE,
-});
+// Support both DATABASE_URL (Easypanel internal link) and individual credentials
+const pool = process.env.DATABASE_URL
+  ? new Pool({
+      connectionString: process.env.DATABASE_URL,
+      ssl: process.env.NODE_ENV === 'production' && !process.env.DATABASE_URL.includes('localhost')
+        ? { rejectUnauthorized: false }
+        : false
+    })
+  : new Pool({
+      host: process.env.PGHOST,
+      port: process.env.PGPORT || 5432,
+      user: process.env.PGUSER,
+      password: process.env.PGPASSWORD,
+      database: process.env.PGDATABASE,
+    });
 
 // SendGrid configuration
 if (process.env.SENDGRID_API_KEY) {

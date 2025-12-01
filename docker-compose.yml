@@ -32,12 +32,15 @@ services:
       NODE_ENV: production
       PORT: 3000
       
-      # PostgreSQL connection
-      PGHOST: postgres
-      PGPORT: 5432
-      PGUSER: bookavan
-      PGPASSWORD: bookavan_password_change_in_production
-      PGDATABASE: bookavan
+      # PostgreSQL connection (using DATABASE_URL)
+      DATABASE_URL: postgresql://bookavan:bookavan_password_change_in_production@postgres:5432/bookavan
+      
+      # Alternative: Individual credentials (not needed when DATABASE_URL is set)
+      # PGHOST: postgres
+      # PGPORT: 5432
+      # PGUSER: bookavan
+      # PGPASSWORD: bookavan_password_change_in_production
+      # PGDATABASE: bookavan
       
       # SendGrid (replace with your values)
       SENDGRID_API_KEY: ${SENDGRID_API_KEY:-your_sendgrid_api_key}
