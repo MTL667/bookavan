@@ -1,0 +1,300 @@
+BookAVan/
+│
+├── 📄 Core Application Files
+│   ├── server.js                    # Express.js backend server (Node.js)
+│   ├── package.json                 # npm dependencies and scripts
+│   └── package-lock.json            # Locked dependency versions
+│
+├── 🎨 Frontend (public/)
+│   ├── index.html                   # Landing page (Dutch, responsive)
+│   ├── styles.css                   # Modern CSS styling
+│   └── app.js                       # Frontend JavaScript + MSAL auth
+│
+├── 🗄️ Database (database/)
+│   └── schema.sql                   # PostgreSQL schema (3 tables)
+│
+├── 🐳 Docker & Deployment
+│   ├── Dockerfile                   # Production Docker image
+│   ├── docker-compose.yml           # Local development setup
+│   ├── .dockerignore                # Docker build optimization
+│   └── easypanel.json               # Easypanel configuration
+│
+├── 📚 Documentation
+│   ├── README.md                    # Main documentation
+│   ├── DEPLOYMENT.md                # Deployment guide (Easypanel, etc.)
+│   ├── QUICK_START.md               # 5-minute setup guide
+│   ├── PROJECT_SUMMARY.md           # Complete project overview
+│   └── PROJECT_STRUCTURE.txt        # This file
+│
+├── ⚙️ Configuration
+│   ├── env.example                  # Environment variables template
+│   ├── .gitignore                   # Git ignore rules
+│   └── setup.sh                     # Automated setup script
+│
+├── 📁 Runtime Directories
+│   ├── uploads/                     # Photo uploads storage
+│   │   └── .gitkeep                 # Keep directory in git
+│   └── node_modules/                # npm packages (not in git)
+│
+└── 📜 Legal
+    └── LICENSE                      # MIT License
+
+═══════════════════════════════════════════════════════════════════
+
+📊 PROJECT STATISTICS
+
+Total Files Created:        19
+Code Files:                 7 (JS, HTML, CSS, SQL)
+Documentation Files:        5 (Markdown)
+Configuration Files:        7 (Docker, env, etc.)
+Total Lines of Code:        ~2,500+
+Documentation Lines:        ~2,000+
+
+═══════════════════════════════════════════════════════════════════
+
+🎯 KEY FEATURES IMPLEMENTED
+
+✅ Responsive Landing Page (Dutch)
+   • Hero section with CTA
+   • Interactive booking calendar
+   • Dynamic photo gallery
+   • AppMyCar integration section
+   • FAQ accordion
+   • Contact/footer
+
+✅ Backend API (Express.js)
+   • PostgreSQL integration
+   • SendGrid email API
+   • Microsoft Entra ID auth
+   • File upload (multer)
+   • Admin endpoints
+   • Health check
+
+✅ Frontend (Vanilla JS)
+   • MSAL.js authentication
+   • Calendar interactions
+   • Form validation
+   • Admin panel
+   • Responsive design
+
+✅ Docker & Deployment
+   • Production Dockerfile
+   • Docker Compose setup
+   • Easypanel ready
+   • Health checks
+   • Volume management
+
+✅ Security
+   • JWT token validation
+   • Tenant whitelist
+   • Admin role system
+   • SQL injection prevention
+   • CORS protection
+
+═══════════════════════════════════════════════════════════════════
+
+🗄️ DATABASE SCHEMA
+
+┌─────────────────┐
+│   bookings      │  → Employee van reservations
+├─────────────────┤
+│ id (UUID)       │
+│ start_datetime  │
+│ end_datetime    │
+│ name            │
+│ email           │
+│ phone           │
+│ department      │
+│ reason          │
+│ created_at      │
+└─────────────────┘
+
+┌─────────────────┐
+│ blocked_slots   │  → Maintenance periods
+├─────────────────┤
+│ id (UUID)       │
+│ start_datetime  │
+│ end_datetime    │
+│ reason          │
+│ created_at      │
+└─────────────────┘
+
+┌─────────────────┐
+│     photos      │  → Van photo gallery
+├─────────────────┤
+│ id (UUID)       │
+│ file_name       │
+│ file_url        │
+│ uploaded_by     │
+│ uploaded_at     │
+└─────────────────┘
+
+═══════════════════════════════════════════════════════════════════
+
+🔌 API ENDPOINTS
+
+PUBLIC
+  GET  /                         → Serve landing page
+  GET  /api/photos               → Get van photos
+  GET  /api/availability         → Get calendar data
+  GET  /health                   → Health check
+
+AUTHENTICATED
+  POST /api/bookings             → Create booking (requires login)
+
+ADMIN ONLY
+  POST /api/admin/blocked-slots  → Block time period
+  POST /api/admin/photos         → Upload photo
+  DELETE /api/admin/photos/:id   → Delete photo
+  GET  /api/admin/bookings       → List all bookings
+
+═══════════════════════════════════════════════════════════════════
+
+🚀 DEPLOYMENT OPTIONS
+
+1. Easypanel (Recommended)
+   • One-click PostgreSQL
+   • Automatic SSL
+   • Environment vars
+   • Git integration
+
+2. Docker Compose
+   • Local development
+   • Includes database
+   • Easy to run
+
+3. Cloud Platforms
+   • AWS ECS/Fargate
+   • Google Cloud Run
+   • Azure Container Instances
+   • DigitalOcean
+
+═══════════════════════════════════════════════════════════════════
+
+⚙️ ENVIRONMENT VARIABLES REQUIRED
+
+# Server
+PORT=3000
+NODE_ENV=production
+
+# PostgreSQL
+PGHOST=localhost
+PGPORT=5432
+PGUSER=bookavan
+PGPASSWORD=your_password
+PGDATABASE=bookavan
+
+# SendGrid
+SENDGRID_API_KEY=SG.xxxxx
+FROM_EMAIL=noreply@company.com
+
+# Microsoft Entra ID
+ENTRA_ALLOWED_TENANTS=tenant-id-1,tenant-id-2
+ADMIN_EMAILS=admin@company.com,it@company.com
+
+═══════════════════════════════════════════════════════════════════
+
+📦 npm DEPENDENCIES
+
+Production:
+  • express            → Web framework
+  • pg                 → PostgreSQL client
+  • dotenv             → Environment variables
+  • @sendgrid/mail     → SendGrid API
+  • jsonwebtoken       → JWT handling
+  • multer             → File uploads
+  • cors               → CORS middleware
+  • uuid               → UUID generation
+
+Development:
+  • nodemon            → Auto-restart server
+
+═══════════════════════════════════════════════════════════════════
+
+🎨 DESIGN SYSTEM
+
+Colors:
+  Primary Blue:    #2563eb
+  Secondary Gray:  #f3f4f6
+  Dark Gray:       #1f2937
+  Success Green:   #10b981
+  Error Red:       #ef4444
+
+Typography:
+  Font: System font stack
+  Sizes: 0.875rem - 2.25rem
+  Line Height: 1.2 - 1.8
+
+Layout:
+  Max Width: 1200px
+  Breakpoints: 480px, 768px, 968px
+  Spacing: 0.5rem - 4rem
+
+Components:
+  • Cards with shadow
+  • Rounded corners (0.375rem - 1rem)
+  • Smooth transitions (0.3s)
+  • Blue primary buttons
+  • Interactive calendar
+  • Accordion FAQ
+
+═══════════════════════════════════════════════════════════════════
+
+✅ PRODUCTION READY CHECKLIST
+
+Backend:
+  ✓ Express.js server
+  ✓ PostgreSQL integration
+  ✓ SendGrid email
+  ✓ Entra ID auth
+  ✓ Error handling
+  ✓ Input validation
+  ✓ Security middleware
+
+Frontend:
+  ✓ Responsive design
+  ✓ MSAL authentication
+  ✓ Interactive calendar
+  ✓ Form validation
+  ✓ Loading states
+  ✓ Error messages
+
+DevOps:
+  ✓ Dockerfile
+  ✓ Docker Compose
+  ✓ Health checks
+  ✓ Environment config
+  ✓ .gitignore
+  ✓ .dockerignore
+
+Documentation:
+  ✓ README.md
+  ✓ DEPLOYMENT.md
+  ✓ QUICK_START.md
+  ✓ Code comments
+  ✓ API documentation
+
+═══════════════════════════════════════════════════════════════════
+
+🎉 PROJECT STATUS: COMPLETE ✅
+
+The BookAVan project is fully implemented and ready for deployment!
+
+Next Steps:
+  1. Configure environment variables (env.example → .env)
+  2. Set up PostgreSQL database (database/schema.sql)
+  3. Configure SendGrid API key
+  4. Register Microsoft Entra ID app
+  5. Run locally: npm start
+  6. Deploy to Easypanel (see DEPLOYMENT.md)
+
+For help, see:
+  • README.md         → Full documentation
+  • QUICK_START.md    → Fast setup
+  • DEPLOYMENT.md     → Deployment guide
+
+═══════════════════════════════════════════════════════════════════
+
+Built with ❤️ using Node.js, Express, PostgreSQL, and vanilla JavaScript
+Version 1.0.0 | December 2025 | MIT License
+

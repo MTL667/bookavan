@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reserveer de Bestelwagen | BookAVan</title>
+    <meta name="description" content="Reserveer de bedrijfsbestelwagen voor medewerkers">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://alcdn.msauth.net/browser/2.30.0/js/msal-browser.min.js"></script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h1>🚐 BookAVan</h1>
+            </div>
+            <div class="nav-links">
+                <a href="#booking">Reserveren</a>
+                <a href="#photos">Foto's</a>
+                <a href="#faq">FAQ</a>
+                <a href="#contact">Contact</a>
+                <button id="loginBtn" class="btn btn-outline">Inloggen met Microsoft</button>
+                <div id="userInfo" class="user-info" style="display: none;">
+                    <span id="userName"></span>
+                    <button id="logoutBtn" class="btn btn-outline btn-sm">Uitloggen</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1 class="hero-title">Reserveer hier de bestelwagen</h1>
+                <p class="hero-subtitle">
+                    De bedrijfsbestelwagen is beschikbaar voor alle medewerkers. 
+                    Reserveer eenvoudig online en haal de sleutels op bij de receptie.
+                </p>
+                <button class="btn btn-primary btn-lg" onclick="scrollToBooking()">
+                    Nu reserveren
+                </button>
+                <p class="hero-note">
+                    <small>✓ Alleen voor medewerkers | ✓ Gratis te gebruiken | ✓ Direct beschikbaar</small>
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Booking Section -->
+    <section id="booking" class="section section-booking">
+        <div class="container">
+            <h2 class="section-title">Reserveer de bestelwagen</h2>
+            <p class="section-subtitle">Selecteer datum en tijd en vul het formulier in</p>
+
+            <!-- Auth warning -->
+            <div id="authWarning" class="alert alert-info">
+                ℹ️ Log in met uw Microsoft-account om een reservering te maken
+            </div>
+
+            <div class="booking-container">
+                <!-- Calendar -->
+                <div class="calendar-container">
+                    <div class="calendar-header">
+                        <button id="prevMonth" class="btn btn-sm">‹</button>
+                        <h3 id="currentMonth">December 2025</h3>
+                        <button id="nextMonth" class="btn btn-sm">›</button>
+                    </div>
+                    <div id="calendar" class="calendar"></div>
+                    <div class="calendar-legend">
+                        <div class="legend-item">
+                            <span class="legend-color available"></span>
+                            <span>Beschikbaar</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color booked"></span>
+                            <span>Gereserveerd</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color blocked"></span>
+                            <span>Onderhoud</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Booking Form -->
+                <div class="booking-form-container">
+                    <form id="bookingForm" class="booking-form">
+                        <h3>Reserveringsgegevens</h3>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="startDate">Ophaaldatum</label>
+                                <input type="date" id="startDate" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="startTime">Tijd</label>
+                                <input type="time" id="startTime" value="09:00" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="endDate">Terugbrengdatum</label>
+                                <input type="date" id="endDate" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="endTime">Tijd</label>
+                                <input type="time" id="endTime" value="17:00" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="name">Naam *</label>
+                            <input type="text" id="name" placeholder="Volledige naam" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="email">E-mailadres *</label>
+                            <input type="email" id="email" placeholder="naam@bedrijf.nl" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="phone">Telefoonnummer *</label>
+                            <input type="tel" id="phone" placeholder="+31 6 12345678" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="department">Afdeling / Team *</label>
+                            <input type="text" id="department" placeholder="Bijv. Marketing, Sales, IT" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reason">Reden van gebruik *</label>
+                            <textarea id="reason" rows="3" placeholder="Beschrijf kort waarvoor u de bestelwagen nodig heeft" required></textarea>
+                        </div>
+
+                        <div id="formError" class="alert alert-error" style="display: none;"></div>
+                        <div id="formSuccess" class="alert alert-success" style="display: none;"></div>
+
+                        <button type="submit" class="btn btn-primary btn-lg btn-block">
+                            Boeking bevestigen
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Photos Section -->
+    <section id="photos" class="section section-gray">
+        <div class="container">
+            <h2 class="section-title">Foto's van de bestelwagen</h2>
+            <p class="section-subtitle">Bekijk de bedrijfsbestelwagen</p>
+
+            <!-- Admin photo upload -->
+            <div id="adminPhotoUpload" style="display: none;" class="admin-section">
+                <h3>Foto uploaden (Admin)</h3>
+                <form id="photoUploadForm">
+                    <input type="file" id="photoFile" accept="image/*" required>
+                    <button type="submit" class="btn btn-primary">Upload foto</button>
+                </form>
+            </div>
+
+            <div id="photosGrid" class="photos-grid">
+                <div class="loading">Foto's laden...</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- AppMyCar Section -->
+    <section id="appmycar" class="section">
+        <div class="container">
+            <div class="appmycar-content">
+                <div class="appmycar-text">
+                    <h2 class="section-title">Voor- en nafoto's via AppMyCar</h2>
+                    <p>
+                        Voor het gebruik van de bestelwagen is het <strong>verplicht</strong> om voor vertrek 
+                        foto's te maken van de bestelwagen. Na terugkomst moet u opnieuw foto's maken.
+                    </p>
+                    <p>
+                        Deze foto's worden gebruikt om de staat van de wagen te controleren en eventuele 
+                        schade vast te stellen. Download de AppMyCar app op uw smartphone.
+                    </p>
+                    <ul class="checklist">
+                        <li>✓ Maak foto's van alle kanten van de wagen</li>
+                        <li>✓ Fotografeer eventuele bestaande schade</li>
+                        <li>✓ Herhaal dit proces na terugkomst</li>
+                        <li>✓ Bewaar de foto's voor uw administratie</li>
+                    </ul>
+                    <a href="https://apps.apple.com/ph/app/mycar-link/id1590489755" 
+                       target="_blank" 
+                       class="btn btn-primary btn-lg">
+                        Download AppMyCar
+                    </a>
+                </div>
+                <div class="appmycar-image">
+                    <div class="phone-mockup">
+                        <div class="phone-screen">
+                            <div class="app-icon">📱</div>
+                            <h3>AppMyCar</h3>
+                            <p>Fotografeer uw voertuig</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section id="faq" class="section section-gray">
+        <div class="container">
+            <h2 class="section-title">Veelgestelde vragen</h2>
+            <p class="section-subtitle">Alles wat u moet weten over de bestelwagen</p>
+
+            <div class="faq-container">
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>Waar kan ik de sleutels ophalen?</span>
+                        <span class="faq-icon">+</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>
+                            De sleutels van de bestelwagen zijn beschikbaar bij de receptie tijdens 
+                            kantooruren (maandag t/m vrijdag van 8:00 tot 17:00). Neem bij het ophalen 
+                            uw medewerkersbadge mee voor identificatie.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>Hoe werkt de tankkaart?</span>
+                        <span class="faq-icon">+</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>
+                            In het handschoenvakje vindt u de tankkaart. De pincode is <strong>1234</strong>. 
+                            U kunt bij elk tankstation van Shell en BP tanken. Let op: tank altijd 
+                            <strong>diesel</strong>. Breng de wagen met een volle tank terug.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>Wat als de bestelwagen al bezet is?</span>
+                        <span class="faq-icon">+</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>
+                            Het systeem controleert automatisch de beschikbaarheid. Als de gewenste periode 
+                            al gereserveerd is, krijgt u een melding. Kies dan een andere datum of tijd. 
+                            U kunt in de kalender zien welke periodes nog beschikbaar zijn.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>Wat bij schade of problemen?</span>
+                        <span class="faq-icon">+</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>
+                            Meld eventuele schade direct bij de receptie of de facilitaire dienst via 
+                            <a href="mailto:facilities@bedrijf.nl">facilities@bedrijf.nl</a>. Bij pech 
+                            onderweg, bel de pechhulp (nummer staat in het handschoenvakje). Maak altijd 
+                            foto's van nieuwe schade met de AppMyCar app.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>Mag ik de bestelwagen privé gebruiken?</span>
+                        <span class="faq-icon">+</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>
+                            Nee, de bestelwagen is uitsluitend bedoeld voor zakelijk gebruik in opdracht 
+                            van het bedrijf. Privégebruik is niet toegestaan en kan leiden tot 
+                            disciplinaire maatregelen.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>Hoe ver van tevoren moet ik reserveren?</span>
+                        <span class="faq-icon">+</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>
+                            U kunt tot op de dag zelf reserveren, mits de bestelwagen beschikbaar is. 
+                            We raden echter aan om minimaal 1-2 dagen van tevoren te reserveren, vooral 
+                            voor drukke periodes zoals begin van de maand.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact / Footer -->
+    <footer id="contact" class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Contact</h3>
+                    <p>
+                        <strong>E-mail:</strong> 
+                        <a href="mailto:info@bedrijf.nl">info@bedrijf.nl</a>
+                    </p>
+                    <p>
+                        <strong>Telefoon:</strong> 
+                        <a href="tel:+31201234567">+31 20 123 45 67</a>
+                    </p>
+                    <p>
+                        <strong>Facilitaire dienst:</strong> 
+                        <a href="mailto:facilities@bedrijf.nl">facilities@bedrijf.nl</a>
+                    </p>
+                </div>
+
+                <div class="footer-section">
+                    <h3>Openingstijden receptie</h3>
+                    <p>Maandag - Vrijdag: 8:00 - 17:00</p>
+                    <p>Weekend: Gesloten</p>
+                    <p><small>Sleutels alleen tijdens openingstijden</small></p>
+                </div>
+
+                <div class="footer-section">
+                    <h3>Belangrijke links</h3>
+                    <p><a href="https://apps.apple.com/ph/app/mycar-link/id1590489755" target="_blank">AppMyCar downloaden</a></p>
+                    <p><a href="#faq">Veelgestelde vragen</a></p>
+                    <p><a href="#booking">Reserveren</a></p>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>
+                    &copy; 2025 BookAVan. Alle rechten voorbehouden. 
+                    <span class="separator">|</span> 
+                    <a href="#">Privacy beleid</a>
+                    <span class="separator">|</span>
+                    <a href="#">Algemene voorwaarden</a>
+                </p>
+                <p class="gdpr-note">
+                    <small>
+                        Uw gegevens worden verwerkt conform de AVG (Algemene Verordening Gegevensbescherming). 
+                        We bewaren uw reserveringsgegevens voor administratieve doeleinden.
+                    </small>
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Admin Panel (hidden by default) -->
+    <div id="adminPanel" class="admin-panel" style="display: none;">
+        <button id="closeAdmin" class="close-btn">&times;</button>
+        <h2>Administrator Panel</h2>
+        
+        <div class="admin-section">
+            <h3>Periode blokkeren</h3>
+            <form id="blockSlotForm">
+                <div class="form-group">
+                    <label>Start datum en tijd</label>
+                    <input type="datetime-local" id="blockStart" required>
+                </div>
+                <div class="form-group">
+                    <label>Eind datum en tijd</label>
+                    <input type="datetime-local" id="blockEnd" required>
+                </div>
+                <div class="form-group">
+                    <label>Reden</label>
+                    <input type="text" id="blockReason" placeholder="Bijv. Onderhoud, APK" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Blokkeer periode</button>
+            </form>
+        </div>
+    </div>
+
+    <button id="adminBtn" class="floating-btn" style="display: none;" title="Admin Panel">
+        ⚙️
+    </button>
+
+    <script src="app.js"></script>
+</body>
+</html>
+

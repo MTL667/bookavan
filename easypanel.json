@@ -1,0 +1,106 @@
+{
+  "name": "bookavan",
+  "description": "Van booking system for company employees",
+  "version": "1.0.0",
+  "services": [
+    {
+      "type": "app",
+      "name": "bookavan",
+      "image": {
+        "type": "build",
+        "dockerfilePath": "./Dockerfile"
+      },
+      "domains": [
+        {
+          "host": "bookavan.yourcompany.com",
+          "https": true
+        }
+      ],
+      "env": [
+        {
+          "key": "NODE_ENV",
+          "value": "production"
+        },
+        {
+          "key": "PORT",
+          "value": "3000"
+        },
+        {
+          "key": "PGHOST",
+          "value": "$(PROJECT_NAME)_postgres"
+        },
+        {
+          "key": "PGPORT",
+          "value": "5432"
+        },
+        {
+          "key": "PGUSER",
+          "value": "bookavan"
+        },
+        {
+          "key": "PGPASSWORD",
+          "value": "$$generate(password)"
+        },
+        {
+          "key": "PGDATABASE",
+          "value": "bookavan"
+        },
+        {
+          "key": "SENDGRID_API_KEY",
+          "value": ""
+        },
+        {
+          "key": "FROM_EMAIL",
+          "value": "noreply@yourcompany.com"
+        },
+        {
+          "key": "ENTRA_ALLOWED_TENANTS",
+          "value": ""
+        },
+        {
+          "key": "ADMIN_EMAILS",
+          "value": "admin@yourcompany.com"
+        }
+      ],
+      "mounts": [
+        {
+          "type": "volume",
+          "name": "uploads",
+          "mountPath": "/app/uploads"
+        }
+      ],
+      "deploy": {
+        "replicas": 1,
+        "resources": {
+          "limits": {
+            "memory": "512M",
+            "cpu": "0.5"
+          }
+        }
+      },
+      "healthcheck": {
+        "path": "/health",
+        "interval": 30,
+        "timeout": 3,
+        "retries": 3
+      }
+    },
+    {
+      "type": "postgres",
+      "name": "postgres",
+      "version": "15",
+      "database": "bookavan",
+      "username": "bookavan",
+      "password": "$$generate(password)",
+      "deploy": {
+        "resources": {
+          "limits": {
+            "memory": "512M",
+            "cpu": "0.5"
+          }
+        }
+      }
+    }
+  ]
+}
+
