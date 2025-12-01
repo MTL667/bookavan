@@ -422,7 +422,26 @@ app.get('/health', async (req, res) => {
   }
 });
 
-// Serve frontend
+// Serve frontend with injected config
+app.get('/', (req, res) => {
+  const fs = require('fs');
+  const htmlPath = path.join(__dirname, 'public', 'index.html');
+  let html = fs.readFileSync(htmlPath, 'utf8');
+  
+  // Inject Entra ID configuration
+  const configScript = `
+    <script>
+      // Microsoft Entra ID Configuration
+      window.ENTRA_CLIENT_ID = "${process.env.ENTRA_CLIENT_ID || ''}";
+      window.ADMIN_EMAILS = "${process.env.ADMIN_EMAILS || ''}";
+    </script>
+  `;
+  
+  html = html.replace('</head>', `${configScript}</head>`);
+  res.send(html);
+});
+
+// Serve static files for other routes
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
