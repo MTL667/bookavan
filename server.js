@@ -430,8 +430,29 @@ app.get('/health', async (req, res) => {
   }
 });
 
+// Debug endpoint to check environment variables (remove in production)
+app.get('/api/debug/config', (req, res) => {
+  res.json({
+    entra_client_id_set: !!process.env.ENTRA_CLIENT_ID,
+    entra_client_id_length: (process.env.ENTRA_CLIENT_ID || '').length,
+    entra_client_id_preview: process.env.ENTRA_CLIENT_ID ? 
+      process.env.ENTRA_CLIENT_ID.substring(0, 8) + '...' : 'NOT SET',
+    admin_emails_set: !!process.env.ADMIN_EMAILS,
+    database_url_set: !!process.env.DATABASE_URL,
+    sendgrid_key_set: !!process.env.SENDGRID_API_KEY,
+    node_env: process.env.NODE_ENV,
+  });
+});
+
 // Serve frontend with injected config
-app.get('/', (req, res) => {
+app.get('*', (req, res) => {
+  // Skip API routes and static assets
+  if (req.path.startsWith('/api') || 
+      req.path.startsWith('/uploads') ||
+      req.path.match(/\.(js|css|png|jpg|jpeg|gif|ico|svg)$/)) {
+    return res.status(404).send('Not found');
+  }
+  
   const fs = require('fs');
   const htmlPath = path.join(__dirname, 'public', 'index.html');
   let html = fs.readFileSync(htmlPath, 'utf8');
@@ -447,11 +468,6 @@ app.get('/', (req, res) => {
   
   html = html.replace('</head>', `${configScript}</head>`);
   res.send(html);
-});
-
-// Serve static files for other routes
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // Error handling middleware
