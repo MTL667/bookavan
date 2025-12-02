@@ -128,6 +128,9 @@ function updateUIForLoggedInUser() {
         document.getElementById('adminBtn').style.display = 'block';
         document.getElementById('adminPhotoUpload').style.display = 'block';
     }
+    
+    // Reload photos to show delete buttons for admins
+    loadPhotos();
 }
 
 function updateUIForLoggedOutUser() {
@@ -339,6 +342,7 @@ function renderPhotos(photos) {
     }
     
     const isAdmin = checkIfAdmin();
+    console.log('🔍 Rendering photos - Is Admin:', isAdmin, 'Current User:', currentUser);
     
     grid.innerHTML = photos.map(photo => `
         <div class="photo-card" data-photo-id="${photo.id}">
@@ -357,10 +361,20 @@ function renderPhotos(photos) {
 
 // Check if current user is admin
 function checkIfAdmin() {
-    if (!currentUser) return false;
-    const adminEmails = (window.ADMIN_EMAILS || '').toLowerCase().split(',');
-    const userEmail = (currentUser.username || currentUser.email || '').toLowerCase();
-    return adminEmails.includes(userEmail.trim());
+    if (!currentUser) {
+        console.log('🔍 checkIfAdmin: No current user');
+        return false;
+    }
+    const adminEmails = (window.ADMIN_EMAILS || '').toLowerCase().split(',').map(e => e.trim());
+    const userEmail = (currentUser.username || currentUser.email || '').toLowerCase().trim();
+    
+    console.log('🔍 checkIfAdmin:', {
+        userEmail: userEmail,
+        adminEmails: adminEmails,
+        isAdmin: adminEmails.includes(userEmail)
+    });
+    
+    return adminEmails.includes(userEmail);
 }
 
 // Delete photo (admin only)
