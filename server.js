@@ -14,6 +14,16 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// Security headers for MSAL.js popup flow
+app.use((req, res, next) => {
+  // Allow popups to communicate with opener window
+  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
+  // Required for MSAL.js
+  res.setHeader('Cross-Origin-Embedder-Policy', 'unsafe-none');
+  next();
+});
+
 app.use(express.static('public'));
 app.use('/uploads', express.static('uploads'));
 

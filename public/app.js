@@ -36,11 +36,18 @@ async function initializeMSAL() {
             msalInstance = new msal.PublicClientApplication(msalConfig);
             await msalInstance.initialize();
             
-            // Check if user is already logged in
-            const accounts = msalInstance.getAllAccounts();
-            if (accounts.length > 0) {
-                currentUser = accounts[0];
+            // Handle redirect response (when user returns from Microsoft login)
+            const response = await msalInstance.handleRedirectPromise();
+            if (response) {
+                currentUser = response.account;
                 updateUIForLoggedInUser();
+            } else {
+                // Check if user is already logged in
+                const accounts = msalInstance.getAllAccounts();
+                if (accounts.length > 0) {
+                    currentUser = accounts[0];
+                    updateUIForLoggedInUser();
+                }
             }
         } else {
             console.warn('MSAL library not loaded');
@@ -57,22 +64,54 @@ async function login() {
     }
     
     try {
+        // Try popup first
         const response = await msalInstance.loginPopup(loginRequest);
         currentUser = response.account;
         updateUIForLoggedInUser();
     } catch (error) {
-        console.error('Login error:', error);
-        alert('Inloggen mislukt. Probeer het opnieuw.');
+        console.error('Login popup error:', error);
+        
+        // If popup fails (COOP, popup blocked, etc), use redirect
+        if (error.errorCode === 'popup_window_error' || 
+            error.errorCode === 'empty_window_error' ||
+            error.message?.includes('popup') ||
+            error.message?.includes('Cross-Origin-Opener-Policy')) {
+            console.log('Popup blocked or COOP issue, falling back to redirect...');
+            try {
+                await msalInstance.loginRedirect(loginRequest);
+            } catch (redirectError) {
+                console.error('Redirect error:', redirectError);
+                alert('Inloggen mislukt. Controleer of popups zijn toegestaan of probeer een andere browser.');
+            }
+        } else {
+            alert('Inloggen mislukt: ' + (error.message || 'Onbekende fout'));
+        }
     }
 }
 
-function logout() {
+async function logout() {
     if (msalInstance && currentUser) {
-        msalInstance.logoutPopup({
-            account: currentUser
-        });
-        currentUser = null;
-        updateUIForLoggedOutUser();
+        try {
+            // Try popup logout first
+            await msalInstance.logoutPopup({
+                account: currentUser
+            });
+            currentUser = null;
+            updateUIForLoggedOutUser();
+        } catch (error) {
+            console.error('Logout popup error:', error);
+            // Fallback to redirect logout
+            try {
+                await msalInstance.logoutRedirect({
+                    account: currentUser
+                });
+            } catch (redirectError) {
+                console.error('Logout redirect error:', redirectError);
+                // Fallback: clear local state
+                currentUser = null;
+                updateUIForLoggedOutUser();
+            }
+        }
     }
 }
 
