@@ -118,7 +118,10 @@ function updateUIForLoggedInUser() {
     document.getElementById('loginBtn').style.display = 'none';
     document.getElementById('userInfo').style.display = 'flex';
     document.getElementById('userName').textContent = currentUser.name || currentUser.username;
+    
+    // Hide auth warning and show booking section
     document.getElementById('authWarning').style.display = 'none';
+    document.getElementById('bookingContainer').style.display = 'grid';
     
     // Check if user is admin
     const adminEmails = (window.ADMIN_EMAILS || '').toLowerCase().split(',');
@@ -161,9 +164,16 @@ function preFillBookingForm() {
 function updateUIForLoggedOutUser() {
     document.getElementById('loginBtn').style.display = 'block';
     document.getElementById('userInfo').style.display = 'none';
+    
+    // Show auth warning and hide booking section
     document.getElementById('authWarning').style.display = 'block';
+    document.getElementById('bookingContainer').style.display = 'none';
+    
     document.getElementById('adminBtn').style.display = 'none';
     document.getElementById('adminPhotoUpload').style.display = 'none';
+    
+    // Reload photos to hide delete buttons
+    loadPhotos();
 }
 
 // ============================================
@@ -676,6 +686,12 @@ function showSuccess(message) {
 }
 
 function scrollToBooking() {
+    if (!currentUser) {
+        // Not logged in - prompt to login first
+        alert('Log eerst in met uw Microsoft-account om te reserveren');
+        document.getElementById('loginBtn').click();
+        return;
+    }
     document.getElementById('booking').scrollIntoView({ behavior: 'smooth' });
 }
 

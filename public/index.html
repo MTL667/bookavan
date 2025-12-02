@@ -61,12 +61,21 @@
             <h2 class="section-title">Reserveer de bestelwagen</h2>
             <p class="section-subtitle">Selecteer datum en tijd en vul het formulier in</p>
 
-            <!-- Auth warning -->
+            <!-- Auth warning - shown when not logged in -->
             <div id="authWarning" class="alert alert-info">
-                ℹ️ Log in met uw Microsoft-account om een reservering te maken
+                <h3 style="margin-top: 0;">🔒 Login Vereist</h3>
+                <p>Log in met uw Microsoft-account om:</p>
+                <ul style="margin: 1rem 0; text-align: left; max-width: 400px; margin-left: auto; margin-right: auto;">
+                    <li>✓ De beschikbaarheid te bekijken</li>
+                    <li>✓ Een reservering te maken</li>
+                    <li>✓ De bestelwagen te boeken</li>
+                </ul>
+                <button onclick="document.getElementById('loginBtn').click()" class="btn btn-primary" style="margin-top: 1rem;">
+                    Inloggen met Microsoft
+                </button>
             </div>
 
-            <div class="booking-container">
+            <div id="bookingContainer" class="booking-container" style="display: none;">
                 <!-- Calendar -->
                 <div class="calendar-container">
                     <div class="calendar-header">
