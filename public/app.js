@@ -64,53 +64,28 @@ async function login() {
     }
     
     try {
-        // Try popup first
-        const response = await msalInstance.loginPopup(loginRequest);
-        currentUser = response.account;
-        updateUIForLoggedInUser();
+        // Use redirect flow directly (more reliable than popup)
+        console.log('Starting login redirect...');
+        await msalInstance.loginRedirect(loginRequest);
+        // User will be redirected to Microsoft, then back to the app
     } catch (error) {
-        console.error('Login popup error:', error);
-        
-        // If popup fails (COOP, popup blocked, etc), use redirect
-        if (error.errorCode === 'popup_window_error' || 
-            error.errorCode === 'empty_window_error' ||
-            error.message?.includes('popup') ||
-            error.message?.includes('Cross-Origin-Opener-Policy')) {
-            console.log('Popup blocked or COOP issue, falling back to redirect...');
-            try {
-                await msalInstance.loginRedirect(loginRequest);
-            } catch (redirectError) {
-                console.error('Redirect error:', redirectError);
-                alert('Inloggen mislukt. Controleer of popups zijn toegestaan of probeer een andere browser.');
-            }
-        } else {
-            alert('Inloggen mislukt: ' + (error.message || 'Onbekende fout'));
-        }
+        console.error('Login redirect error:', error);
+        alert('Inloggen mislukt: ' + (error.errorMessage || error.message || 'Onbekende fout'));
     }
 }
 
 async function logout() {
     if (msalInstance && currentUser) {
         try {
-            // Try popup logout first
-            await msalInstance.logoutPopup({
+            // Use redirect logout (more reliable)
+            await msalInstance.logoutRedirect({
                 account: currentUser
             });
+        } catch (error) {
+            console.error('Logout error:', error);
+            // Fallback: clear local state
             currentUser = null;
             updateUIForLoggedOutUser();
-        } catch (error) {
-            console.error('Logout popup error:', error);
-            // Fallback to redirect logout
-            try {
-                await msalInstance.logoutRedirect({
-                    account: currentUser
-                });
-            } catch (redirectError) {
-                console.error('Logout redirect error:', redirectError);
-                // Fallback: clear local state
-                currentUser = null;
-                updateUIForLoggedOutUser();
-            }
         }
     }
 }
