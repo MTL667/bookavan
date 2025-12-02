@@ -7,6 +7,13 @@
     <meta name="description" content="Reserveer de bedrijfsbestelwagen voor medewerkers">
     <link rel="stylesheet" href="styles.css">
     <script src="https://alcdn.msauth.net/browser/2.30.0/js/msal-browser.min.js"></script>
+    <!-- TEMPORARY: Hardcoded Client ID for debugging -->
+    <script>
+        // This will be overwritten by server injection if it works
+        window.ENTRA_CLIENT_ID = window.ENTRA_CLIENT_ID || "abb7c839-a571-40df-9cbe-a006b68fd29c";
+        window.ADMIN_EMAILS = window.ADMIN_EMAILS || "kevinvanhoecke@hertbelgium.be";
+        console.log("🔍 Client ID set to:", window.ENTRA_CLIENT_ID);
+    </script>
 </head>
 <body>
     <!-- Navigation -->
