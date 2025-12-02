@@ -522,9 +522,44 @@ a:hover {
     display: block;
 }
 
+.photo-card {
+    position: relative;
+}
+
 .photo-card-info {
     padding: var(--spacing-sm);
     text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.btn-delete-photo {
+    background-color: var(--error);
+    color: var(--white);
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 0.25rem 0.5rem;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-delete-photo:hover {
+    background-color: #dc2626;
+    transform: scale(1.1);
+}
+
+.btn-delete-photo:active {
+    transform: scale(0.95);
+}
+
+.photo-card {
+    transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
 .loading {

@@ -338,15 +338,83 @@ function renderPhotos(photos) {
         return;
     }
     
+    const isAdmin = checkIfAdmin();
+    
     grid.innerHTML = photos.map(photo => `
-        <div class="photo-card">
+        <div class="photo-card" data-photo-id="${photo.id}">
             <img src="${photo.file_url}" alt="Van foto" loading="lazy">
             <div class="photo-card-info">
                 <small>${new Date(photo.uploaded_at).toLocaleDateString('nl-NL')}</small>
+                ${isAdmin ? `
+                    <button class="btn-delete-photo" onclick="deletePhoto('${photo.id}')" title="Verwijder foto">
+                        🗑️
+                    </button>
+                ` : ''}
             </div>
         </div>
     `).join('');
 }
+
+// Check if current user is admin
+function checkIfAdmin() {
+    if (!currentUser) return false;
+    const adminEmails = (window.ADMIN_EMAILS || '').toLowerCase().split(',');
+    const userEmail = (currentUser.username || currentUser.email || '').toLowerCase();
+    return adminEmails.includes(userEmail.trim());
+}
+
+// Delete photo (admin only)
+async function deletePhoto(photoId) {
+    if (!confirm('Weet je zeker dat je deze foto wilt verwijderen?')) {
+        return;
+    }
+    
+    try {
+        const token = await getAccessToken();
+        
+        if (!token) {
+            alert('Je moet ingelogd zijn om foto\'s te verwijderen');
+            return;
+        }
+        
+        const response = await fetch(`/api/admin/photos/${photoId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(data.error || 'Fout bij verwijderen foto');
+        }
+        
+        // Remove photo from DOM
+        const photoCard = document.querySelector(`[data-photo-id="${photoId}"]`);
+        if (photoCard) {
+            photoCard.style.opacity = '0';
+            photoCard.style.transform = 'scale(0.8)';
+            setTimeout(() => {
+                photoCard.remove();
+                // Check if grid is empty
+                const grid = document.getElementById('photosGrid');
+                if (grid.children.length === 0) {
+                    grid.innerHTML = '<div class="loading">Nog geen foto\'s beschikbaar</div>';
+                }
+            }, 300);
+        }
+        
+        console.log('Foto succesvol verwijderd');
+        
+    } catch (error) {
+        console.error('Error deleting photo:', error);
+        alert('Fout bij verwijderen foto: ' + error.message);
+    }
+}
+
+// Make deletePhoto globally available
+window.deletePhoto = deletePhoto;
 
 async function submitBooking(formData) {
     const token = await getAccessToken();
