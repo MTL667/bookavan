@@ -50,9 +50,18 @@ if (process.env.SENDGRID_API_KEY) {
 }
 
 // File upload configuration
+const fs = require('fs');
+const uploadsDir = path.join(__dirname, 'uploads');
+
+// Ensure uploads directory exists
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+  console.log('Created uploads directory:', uploadsDir);
+}
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'uploads/');
+    cb(null, uploadsDir);
   },
   filename: (req, file, cb) => {
     const uniqueName = `${Date.now()}-${Math.round(Math.random() * 1E9)}${path.extname(file.originalname)}`;
@@ -366,7 +375,12 @@ app.post('/api/admin/blocked-slots', verifyToken, requireAdmin, async (req, res)
 
 // Upload photo (admin only)
 app.post('/api/admin/photos', verifyToken, requireAdmin, upload.single('photo'), async (req, res) => {
+  console.log('📸 Photo upload request received');
+  console.log('User:', req.user);
+  console.log('File:', req.file);
+  
   if (!req.file) {
+    console.error('❌ No file received in upload');
     return res.status(400).json({ error: 'Geen foto geüpload' });
   }
   
@@ -374,6 +388,16 @@ app.post('/api/admin/photos', verifyToken, requireAdmin, upload.single('photo'),
     const id = uuidv4();
     const fileName = req.file.filename;
     const fileUrl = `/uploads/${fileName}`;
+    const filePath = req.file.path;
+    
+    console.log('📁 File saved to:', filePath);
+    console.log('🔗 File URL:', fileUrl);
+    
+    // Verify file was actually saved
+    if (!fs.existsSync(filePath)) {
+      console.error('❌ File not found after upload:', filePath);
+      return res.status(500).json({ error: 'Fout bij opslaan foto op disk' });
+    }
     
     const result = await pool.query(
       `INSERT INTO photos (id, file_name, file_url, uploaded_by, uploaded_at)
@@ -382,14 +406,19 @@ app.post('/api/admin/photos', verifyToken, requireAdmin, upload.single('photo'),
       [id, fileName, fileUrl, req.user.email]
     );
     
+    console.log('✅ Photo saved to database:', result.rows[0]);
+    
     res.status(201).json({
       message: 'Foto succesvol geüpload',
       photo: result.rows[0]
     });
     
   } catch (error) {
-    console.error('Error uploading photo:', error);
-    res.status(500).json({ error: 'Fout bij uploaden foto' });
+    console.error('❌ Error uploading photo:', error);
+    res.status(500).json({ 
+      error: 'Fout bij uploaden foto',
+      details: error.message 
+    });
   }
 });
 

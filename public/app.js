@@ -516,6 +516,8 @@ async function blockTimeSlot(formData) {
 }
 
 async function uploadPhoto(file) {
+    console.log('📸 Starting photo upload:', file.name, file.size, 'bytes');
+    
     const token = await getAccessToken();
     
     if (!token) {
@@ -525,6 +527,8 @@ async function uploadPhoto(file) {
     const formData = new FormData();
     formData.append('photo', file);
     
+    console.log('📤 Sending upload request...');
+    
     const response = await fetch('/api/admin/photos', {
         method: 'POST',
         headers: {
@@ -533,12 +537,17 @@ async function uploadPhoto(file) {
         body: formData
     });
     
+    console.log('📥 Upload response status:', response.status);
+    
     const data = await response.json();
+    console.log('📥 Upload response data:', data);
     
     if (!response.ok) {
-        throw new Error(data.error || 'Fout bij uploaden foto');
+        const errorMsg = data.details ? `${data.error}: ${data.details}` : data.error;
+        throw new Error(errorMsg || 'Fout bij uploaden foto');
     }
     
+    console.log('✅ Photo uploaded successfully:', data.photo);
     return data;
 }
 
