@@ -129,8 +129,33 @@ function updateUIForLoggedInUser() {
         document.getElementById('adminPhotoUpload').style.display = 'block';
     }
     
+    // Pre-fill booking form with user data from Microsoft account
+    preFillBookingForm();
+    
     // Reload photos to show delete buttons for admins
     loadPhotos();
+}
+
+// Pre-fill booking form with user data
+function preFillBookingForm() {
+    if (!currentUser) return;
+    
+    const nameField = document.getElementById('name');
+    const emailField = document.getElementById('email');
+    
+    if (nameField) {
+        nameField.value = currentUser.name || '';
+        nameField.readOnly = true;
+        nameField.style.backgroundColor = '#f3f4f6';
+        nameField.style.cursor = 'not-allowed';
+    }
+    
+    if (emailField) {
+        emailField.value = currentUser.username || currentUser.email || '';
+        emailField.readOnly = true;
+        emailField.style.backgroundColor = '#f3f4f6';
+        emailField.style.cursor = 'not-allowed';
+    }
 }
 
 function updateUIForLoggedOutUser() {
