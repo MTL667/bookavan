@@ -191,7 +191,7 @@ async function sendConfirmationEmail(booking) {
         <ul>
           <li>Breng de bestelwagen op tijd terug</li>
           <li>Zorg ervoor dat de wagen schoon is bij terugkomst</li>
-          <li>Tank de wagen vol voordat u hem terugbrengt</li>
+          <li>Tank de wagen vol voordat u hem terugbrengt (diesel en/of AdBlue indien nodig)</li>
           <li>Meld eventuele schade direct aan de receptie</li>
           <li>De bestelwagen is alleen voor zakelijk gebruik</li>
         </ul>
