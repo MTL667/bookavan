@@ -742,6 +742,11 @@ function initializeFAQ() {
 // ============================================
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Log configuration on page load
+    console.log('📋 Configuration on DOMContentLoaded:');
+    console.log('   window.ENTRA_CLIENT_ID:', window.ENTRA_CLIENT_ID || 'NOT SET');
+    console.log('   window.ADMIN_EMAILS:', window.ADMIN_EMAILS || 'NOT SET');
+    
     // Initialize MSAL
     initializeMSAL();
     

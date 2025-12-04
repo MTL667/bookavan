@@ -581,12 +581,20 @@ app.get('*', (req, res) => {
   const htmlPath = path.join(__dirname, 'public', 'index.html');
   let html = fs.readFileSync(htmlPath, 'utf8');
   
+  // Log environment variables for debugging
+  console.log('🔧 Injecting config into HTML:');
+  console.log('   ENTRA_CLIENT_ID:', process.env.ENTRA_CLIENT_ID ? `${process.env.ENTRA_CLIENT_ID.substring(0, 8)}...` : 'NOT SET');
+  console.log('   ADMIN_EMAILS:', process.env.ADMIN_EMAILS || 'NOT SET');
+  
   // Inject Entra ID configuration
   const configScript = `
     <script>
-      // Microsoft Entra ID Configuration
+      // Microsoft Entra ID Configuration (injected by server)
       window.ENTRA_CLIENT_ID = "${process.env.ENTRA_CLIENT_ID || ''}";
       window.ADMIN_EMAILS = "${process.env.ADMIN_EMAILS || ''}";
+      console.log('🔧 Config injected by server:');
+      console.log('   ENTRA_CLIENT_ID:', window.ENTRA_CLIENT_ID ? window.ENTRA_CLIENT_ID.substring(0, 8) + '...' : 'NOT SET');
+      console.log('   ADMIN_EMAILS:', window.ADMIN_EMAILS || 'NOT SET');
     </script>
   `;
   
