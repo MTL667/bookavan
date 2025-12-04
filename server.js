@@ -15,6 +15,16 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
+// Request logging (first few requests only)
+let requestCount = 0;
+app.use((req, res, next) => {
+  requestCount++;
+  if (requestCount <= 10 || req.path.includes('/health')) {
+    console.log(`📨 ${req.method} ${req.path} (request #${requestCount})`);
+  }
+  next();
+});
+
 // Security headers for MSAL.js popup flow
 app.use((req, res, next) => {
   // Allow popups to communicate with opener window
@@ -644,11 +654,16 @@ async function startServer() {
     
     // Graceful shutdown
     process.on('SIGTERM', () => {
-      console.log('SIGTERM received, closing server gracefully...');
+      console.log(`🛑 SIGTERM received by container ${CONTAINER_ID}`);
+      console.log(`   Uptime: ${Math.round(process.uptime())}s`);
+      console.log(`   Memory: ${Math.round(process.memoryUsage().rss / 1024 / 1024)}MB`);
+      console.log('   Closing server gracefully...');
+      
       server.close(() => {
-        console.log('Server closed');
+        console.log('   ✅ Server closed');
         pool.end(() => {
-          console.log('Database pool closed');
+          console.log('   ✅ Database pool closed');
+          console.log(`   Container ${CONTAINER_ID} shut down complete`);
           process.exit(0);
         });
       });
@@ -673,6 +688,10 @@ async function startServer() {
   }
 }
 
+// Generate unique container ID for logging
+const CONTAINER_ID = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
 // Start the server
+console.log(`🆔 Container ID: ${CONTAINER_ID}`);
 startServer();
 
