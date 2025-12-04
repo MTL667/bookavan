@@ -63,11 +63,11 @@
         }
       },
       "healthcheck": {
-        "path": "/health",
+        "path": "/health/simple",
         "interval": 30,
-        "timeout": 10,
-        "retries": 3,
-        "startPeriod": 30
+        "timeout": 5,
+        "retries": 5,
+        "startPeriod": 15
       }
     },
     {

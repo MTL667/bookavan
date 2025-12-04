@@ -27,9 +27,8 @@ ENV NODE_ENV=production
 # Expose port 3000
 EXPOSE 3000
 
-# Health check with longer timeout and start period
-HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:3000/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
+# Note: Health checks are handled by Easypanel, not Docker
+# Dockerfile HEALTHCHECK can conflict with Easypanel's health check system
 
 # Run the application
 CMD ["node", "server.js"]
