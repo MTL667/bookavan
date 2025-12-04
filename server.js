@@ -181,7 +181,7 @@ async function sendConfirmationEmail(booking) {
         <p>De sleutels van de bestelwagen kunnen opgehaald worden bij de receptie tijdens kantooruren (8:00 - 17:00).</p>
         
         <h4>Tankkaart</h4>
-        <p>De tankkaart bevindt zich in het handschoenvakje. De pincode is <strong>1853</strong>.</p>
+        <p>De tankkaart (CAPS fuel card) bevindt zich in het handschoenvakje. De pincode is <strong>1853</strong>. U kunt tanken bij alle tankstations waar de CAPS fuel card geaccepteerd wordt.</p>
         
         <h4>Voor- en nafoto's</h4>
         <p>Vergeet niet om voor vertrek en na terugkomst foto's te maken met de AppMyCar app. Dit is verplicht voor alle reserveringen.</p>
