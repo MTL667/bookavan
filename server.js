@@ -537,16 +537,73 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Er is iets misgegaan' });
 });
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
-});
+// Test database connection before starting server
+async function testDatabaseConnection() {
+  try {
+    const result = await pool.query('SELECT NOW()');
+    console.log('✅ Database connection successful:', result.rows[0].now);
+    return true;
+  } catch (error) {
+    console.error('❌ Database connection failed:', error.message);
+    console.error('Connection details:', {
+      DATABASE_URL_set: !!process.env.DATABASE_URL,
+      PGHOST_set: !!process.env.PGHOST,
+      PGUSER_set: !!process.env.PGUSER,
+      PGDATABASE_set: !!process.env.PGDATABASE
+    });
+    return false;
+  }
+}
 
-// Graceful shutdown
-process.on('SIGTERM', () => {
-  console.log('SIGTERM received, closing server...');
-  pool.end();
-  process.exit(0);
-});
+// Start server with error handling
+async function startServer() {
+  try {
+    // Test database connection
+    const dbOk = await testDatabaseConnection();
+    if (!dbOk) {
+      console.error('⚠️  Starting server anyway, but database operations may fail');
+    }
+    
+    // Start listening
+    const server = app.listen(PORT, () => {
+      console.log(`✅ Server running on port ${PORT}`);
+      console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+      console.log(`ENTRA_CLIENT_ID set: ${!!process.env.ENTRA_CLIENT_ID}`);
+      console.log(`ADMIN_EMAILS set: ${!!process.env.ADMIN_EMAILS}`);
+      console.log(`DATABASE_URL set: ${!!process.env.DATABASE_URL}`);
+    });
+    
+    // Graceful shutdown
+    process.on('SIGTERM', () => {
+      console.log('SIGTERM received, closing server gracefully...');
+      server.close(() => {
+        console.log('Server closed');
+        pool.end(() => {
+          console.log('Database pool closed');
+          process.exit(0);
+        });
+      });
+    });
+    
+    // Handle uncaught errors
+    process.on('uncaughtException', (error) => {
+      console.error('❌ Uncaught Exception:', error);
+      console.error(error.stack);
+      process.exit(1);
+    });
+    
+    process.on('unhandledRejection', (reason, promise) => {
+      console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
+      process.exit(1);
+    });
+    
+  } catch (error) {
+    console.error('❌ Failed to start server:', error);
+    console.error(error.stack);
+    process.exit(1);
+  }
+}
+
+// Start the server
+startServer();
 
