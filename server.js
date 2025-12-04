@@ -181,11 +181,11 @@ async function sendConfirmationEmail(booking) {
         <p>De sleutels van de bestelwagen kunnen opgehaald worden bij de receptie tijdens kantooruren (8:00 - 17:00).</p>
         
         <h4>Tankkaart</h4>
-        <p>De tankkaart bevindt zich in het handschoenvakje. De pincode is <strong>1234</strong>.</p>
+        <p>De tankkaart bevindt zich in het handschoenvakje. De pincode is <strong>1853</strong>.</p>
         
         <h4>Voor- en nafoto's</h4>
         <p>Vergeet niet om voor vertrek en na terugkomst foto's te maken met de AppMyCar app. Dit is verplicht voor alle reserveringen.</p>
-        <p><a href="https://apps.apple.com/ph/app/mycar-link/id1590489755" style="color: #2563eb;">Download AppMyCar</a></p>
+        <p><a href="https://apps.apple.com/ph/app/appmycar/id6746201255" style="color: #2563eb;">📲 Download AppMyCar</a></p>
         
         <h4>Belangrijke regels</h4>
         <ul>
@@ -196,7 +196,7 @@ async function sendConfirmationEmail(booking) {
           <li>De bestelwagen is alleen voor zakelijk gebruik</li>
         </ul>
         
-        <p style="margin-top: 30px;">Bij vragen kunt u contact opnemen met <a href="mailto:info@company.com" style="color: #2563eb;">info@company.com</a>.</p>
+        <p style="margin-top: 30px;">Bij vragen kunt u contact opnemen met <a href="mailto:van@hertbelgium.be" style="color: #2563eb;">van@hertbelgium.be</a>.</p>
         
         <p>Met vriendelijke groet,<br>Het Facilities Team</p>
       </div>
