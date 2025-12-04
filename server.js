@@ -483,6 +483,9 @@ app.get('/api/admin/bookings', verifyToken, requireAdmin, async (req, res) => {
 // ============================================
 
 app.get('/health', async (req, res) => {
+  const startTime = Date.now();
+  console.log('🏥 Health check received at', new Date().toISOString());
+  
   try {
     // Quick database check with timeout
     const queryPromise = pool.query('SELECT 1');
@@ -492,25 +495,50 @@ app.get('/health', async (req, res) => {
     
     await Promise.race([queryPromise, timeoutPromise]);
     
+    const duration = Date.now() - startTime;
+    console.log(`✅ Health check passed in ${duration}ms`);
+    
     res.json({ 
       status: 'healthy', 
       database: 'connected',
-      timestamp: new Date().toISOString()
+      duration_ms: duration,
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime()
     });
   } catch (error) {
-    console.warn('⚠️  Health check failed:', error.message);
+    const duration = Date.now() - startTime;
+    console.warn(`⚠️  Health check degraded in ${duration}ms:`, error.message);
+    
     // Return 200 anyway to prevent restart - database issues don't mean app is down
     res.json({ 
       status: 'degraded', 
       database: 'error',
       error: error.message,
-      timestamp: new Date().toISOString()
+      duration_ms: duration,
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime()
     });
   }
 });
 
+// Simple health check without database (for quick checks)
+app.get('/health/simple', (req, res) => {
+  const memUsage = process.memoryUsage();
+  res.json({
+    status: 'ok',
+    uptime: process.uptime(),
+    memory: {
+      rss_mb: Math.round(memUsage.rss / 1024 / 1024),
+      heapUsed_mb: Math.round(memUsage.heapUsed / 1024 / 1024),
+      heapTotal_mb: Math.round(memUsage.heapTotal / 1024 / 1024)
+    },
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Debug endpoint to check environment variables (remove in production)
 app.get('/api/debug/config', (req, res) => {
+  const memUsage = process.memoryUsage();
   res.json({
     entra_client_id_set: !!process.env.ENTRA_CLIENT_ID,
     entra_client_id_length: (process.env.ENTRA_CLIENT_ID || '').length,
@@ -520,6 +548,13 @@ app.get('/api/debug/config', (req, res) => {
     database_url_set: !!process.env.DATABASE_URL,
     sendgrid_key_set: !!process.env.SENDGRID_API_KEY,
     node_env: process.env.NODE_ENV,
+    uptime: process.uptime(),
+    memory: {
+      rss_mb: Math.round(memUsage.rss / 1024 / 1024),
+      heapUsed_mb: Math.round(memUsage.heapUsed / 1024 / 1024),
+      heapTotal_mb: Math.round(memUsage.heapTotal / 1024 / 1024),
+      limit_mb: 512
+    }
   });
 });
 
@@ -589,7 +624,23 @@ async function startServer() {
       console.log(`ENTRA_CLIENT_ID set: ${!!process.env.ENTRA_CLIENT_ID}`);
       console.log(`ADMIN_EMAILS set: ${!!process.env.ADMIN_EMAILS}`);
       console.log(`DATABASE_URL set: ${!!process.env.DATABASE_URL}`);
+      
+      const memUsage = process.memoryUsage();
+      console.log(`Memory: ${Math.round(memUsage.rss / 1024 / 1024)}MB RSS, ${Math.round(memUsage.heapUsed / 1024 / 1024)}MB heap (limit: 512MB)`);
     });
+    
+    // Log memory usage every 60 seconds
+    setInterval(() => {
+      const memUsage = process.memoryUsage();
+      const memMB = Math.round(memUsage.rss / 1024 / 1024);
+      const heapMB = Math.round(memUsage.heapUsed / 1024 / 1024);
+      
+      if (memMB > 400) {
+        console.warn(`⚠️  HIGH MEMORY: ${memMB}MB RSS, ${heapMB}MB heap (limit: 512MB)`);
+      } else {
+        console.log(`📊 Memory: ${memMB}MB RSS, ${heapMB}MB heap, uptime: ${Math.round(process.uptime())}s`);
+      }
+    }, 60000);
     
     // Graceful shutdown
     process.on('SIGTERM', () => {
