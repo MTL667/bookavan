@@ -100,15 +100,28 @@ const verifyToken = (req, res, next) => {
     // In production, you should verify the signature with Microsoft's public keys
     const decoded = jwt.decode(token);
     
+    console.log('🔐 Token decoded:', {
+      email: decoded.email || decoded.preferred_username || decoded.upn,
+      name: decoded.name,
+      tid: decoded.tid,
+      aud: decoded.aud
+    });
+    
     if (!decoded || !decoded.email) {
       return res.status(401).json({ error: 'Ongeldig token' });
     }
     
     // Check if tenant is allowed
     const allowedTenants = (process.env.ENTRA_ALLOWED_TENANTS || '').split(',').map(t => t.trim());
+    console.log('🏢 Allowed tenants:', allowedTenants);
+    console.log('🏢 User tenant ID:', decoded.tid);
+    
     if (allowedTenants.length > 0 && allowedTenants[0] !== '' && !allowedTenants.includes(decoded.tid)) {
+      console.warn('❌ Tenant not allowed:', decoded.tid);
       return res.status(403).json({ error: 'Tenant niet toegestaan' });
     }
+    
+    console.log('✅ Tenant check passed');
     
     req.user = {
       email: decoded.email || decoded.preferred_username || decoded.upn,
@@ -126,11 +139,20 @@ const verifyToken = (req, res, next) => {
 // Middleware: Check if user is admin
 const requireAdmin = (req, res, next) => {
   const adminEmails = (process.env.ADMIN_EMAILS || '').split(',').map(e => e.trim().toLowerCase());
+  const userEmail = req.user.email.toLowerCase();
   
-  if (!adminEmails.includes(req.user.email.toLowerCase())) {
+  console.log('👮 Admin check:');
+  console.log('   User email:', userEmail);
+  console.log('   User tenant:', req.user.tid);
+  console.log('   Admin emails:', adminEmails);
+  console.log('   Is admin?', adminEmails.includes(userEmail));
+  
+  if (!adminEmails.includes(userEmail)) {
+    console.warn('❌ Admin access denied for:', userEmail);
     return res.status(403).json({ error: 'Administratorrechten vereist' });
   }
   
+  console.log('✅ Admin access granted for:', userEmail);
   next();
 };
 
