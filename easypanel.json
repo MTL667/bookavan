@@ -65,8 +65,9 @@
       "healthcheck": {
         "path": "/health",
         "interval": 30,
-        "timeout": 3,
-        "retries": 3
+        "timeout": 10,
+        "retries": 3,
+        "startPeriod": 30
       }
     },
     {

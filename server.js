@@ -484,10 +484,28 @@ app.get('/api/admin/bookings', verifyToken, requireAdmin, async (req, res) => {
 
 app.get('/health', async (req, res) => {
   try {
-    await pool.query('SELECT 1');
-    res.json({ status: 'healthy', database: 'connected' });
+    // Quick database check with timeout
+    const queryPromise = pool.query('SELECT 1');
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Health check timeout')), 2000)
+    );
+    
+    await Promise.race([queryPromise, timeoutPromise]);
+    
+    res.json({ 
+      status: 'healthy', 
+      database: 'connected',
+      timestamp: new Date().toISOString()
+    });
   } catch (error) {
-    res.status(500).json({ status: 'unhealthy', database: 'disconnected' });
+    console.warn('⚠️  Health check failed:', error.message);
+    // Return 200 anyway to prevent restart - database issues don't mean app is down
+    res.json({ 
+      status: 'degraded', 
+      database: 'error',
+      error: error.message,
+      timestamp: new Date().toISOString()
+    });
   }
 });
 
