@@ -34,7 +34,8 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(express.static('public'));
+// Serve static files but NOT index.html (we'll inject config into it)
+app.use(express.static('public', { index: false }));
 app.use('/uploads', express.static('uploads'));
 
 // PostgreSQL connection
